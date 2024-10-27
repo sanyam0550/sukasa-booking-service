@@ -3,6 +3,8 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { User, UserSchema } from './schemas/user.schema';
 import mongoose from 'mongoose';
+import { Flight, FlightSchema } from './schemas/flight.schema';
+import { Seat, SeatSchema } from './schemas/seat.schema';
 @Global()
 @Module({
   imports: [
@@ -14,7 +16,11 @@ import mongoose from 'mongoose';
         uri: configService.get<string>('MONGODB_URI')
       })
     }),
-    MongooseModule.forFeature([{ name: User.name, schema: UserSchema }])
+    MongooseModule.forFeature([
+      { name: User.name, schema: UserSchema },
+      { name: Flight.name, schema: FlightSchema },
+      { name: Seat.name, schema: SeatSchema }
+    ])
   ],
   exports: [MongooseModule]
 })
