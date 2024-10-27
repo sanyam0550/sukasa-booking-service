@@ -4,8 +4,7 @@ import { Flight } from './flight.schema';
 
 enum SeatType {
   ECONOMY = 'economy',
-  BUSINESS = 'business',
-  FIRST_CLASS = 'firstClass'
+  BUSINESS = 'business'
 }
 
 @Schema()
@@ -19,8 +18,21 @@ export class Seat extends Document {
   @Prop({ default: false })
   isBooked: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: 'Flight', required: true }) // Reference to Flight
-  flight: Types.ObjectId | Flight;
+  @Prop({ type: Types.ObjectId, ref: 'Flight', required: true })
+  flightId: Types.ObjectId | Flight;
+
+  @Prop({ type: String })
+  userId: string; // Represents the user who made the booking
+
+  // Passenger Information
+  @Prop({ required: true })
+  passengerName: string;
+
+  @Prop({ required: true })
+  passengerPhone: string;
+
+  @Prop({ required: true })
+  passengerAge: number;
 }
 
 export const SeatSchema = SchemaFactory.createForClass(Seat);

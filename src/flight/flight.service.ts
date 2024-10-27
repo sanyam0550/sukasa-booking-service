@@ -1,7 +1,6 @@
-// src/flight/flight.service.ts
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { CreateFlightDto } from './dto/create-flight.dto';
 import { Flight } from '../database/schemas/flight.schema';
 import { Seat } from '../database/schemas/seat.schema';
@@ -33,11 +32,15 @@ export class FlightService {
       seats.push({
         seatNumber: i.toString(),
         seatType: i <= Math.floor(totalSeats * 0.75) ? 'economy' : 'business', // Example 75% economy, 25% business
-        flight: flightId,
+        flightId: new Types.ObjectId(flightId),
         isBooked: false
       });
     }
 
     return seats;
+  }
+
+  async checkFlightExists(flightId: string): Promise<boolean> {
+    return !!(await this.flightModel.findById(flightId).exec());
   }
 }
