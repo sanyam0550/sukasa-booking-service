@@ -1,9 +1,18 @@
 // src/auth/auth.controller.ts
-import { Controller, Post, Body, HttpCode } from '@nestjs/common';
-import { ApiTags, ApiResponse, ApiBody } from '@nestjs/swagger';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  UnauthorizedException,
+  UseGuards,
+  Req
+} from '@nestjs/common';
+import { ApiTags, ApiResponse, ApiBody, ApiBearerAuth } from '@nestjs/swagger';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
+import { JwtAuthGuard } from './jwt.guard';
 
 @ApiTags('Auth')
 @Controller('auth')
@@ -26,5 +35,17 @@ export class AuthController {
   @ApiBody({ type: RegisterDto })
   async register(@Body() registerDto: RegisterDto) {
     return this.authService.register(registerDto.email, registerDto.password);
+  }
+
+  @Post('logout')
+  @HttpCode(200)
+  @ApiBearerAuth()
+  @ApiResponse({ status: 200, description: 'User successfully logged out' })
+  @ApiResponse({ status: 401, description: 'Unauthorized' })
+  @UseGuards(JwtAuthGuard)
+  async logout(@Req() req: Request) {
+    const authHeader = req.headers['authorization'];
+    const token = authHeader?.split(' ')[1]; // Extract the token from the Authorization header
+    return this.authService.logout(token); // Pass the token to AuthService
   }
 }

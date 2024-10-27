@@ -1,16 +1,19 @@
-import { Injectable, UnauthorizedException, ConflictException } from '@nestjs/common';
+import { Injectable, UnauthorizedException, ConflictException, Inject } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User } from '../database/schemas/user.schema';
 import { UserRole } from './enums/user-role.enum';
+import { LogoutDto } from './dto/logout.dto';
+import { RedisService } from '../database/services/redis.service';
 
 @Injectable()
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    @InjectModel(User.name) private userModel: Model<User>
+    @InjectModel(User.name) private userModel: Model<User>,
+    @Inject() private readonly redisService: RedisService
   ) {}
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -47,5 +50,20 @@ export class AuthService {
     const userObj = savedUser.toObject();
     delete userObj.password;
     return userObj;
+  }
+
+  async logout(token: string) {
+    const decodedToken = this.jwtService.decode(token) as { exp: number };
+
+    if (decodedToken && decodedToken.exp) {
+      const ttl = decodedToken.exp - Math.floor(Date.now() / 1000);
+      await this.redisService.getClient().set(token, 'blacklisted', 'EX', ttl);
+    }
+
+    return { message: 'Successfully logged out' };
+  }
+
+  async isTokenBlacklisted(token: string): Promise<boolean> {
+    return !!(await this.redisService.getClient().get(token));
   }
 }

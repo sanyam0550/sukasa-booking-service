@@ -1,4 +1,3 @@
-// src/seat/seat.controller.ts
 import {
   Controller,
   Post,
@@ -17,19 +16,28 @@ import {
   ApiOperation,
   ApiResponse,
   ApiParam,
-  ApiBody
+  ApiBody,
+  ApiQuery
 } from '@nestjs/swagger';
 import { ReservationQueueService } from './services/reservation-queue.service';
 import { ReserveSeatDto } from './dto/reserve-seat.dto';
 import { JwtAuthGuard } from '../auth/jwt.guard';
 import { ReserveSeatCommand } from './commands/reserve.command';
+import { UserRole } from '../auth/enums/user-role.enum';
+import { Roles } from '../auth/roles.decorator';
+import { SeatService } from './seat.service';
+import { RolesGuard } from '../auth/roles.guard';
+import { ResetSeatsDto } from './dto/reset-seat.dto';
 
 @ApiTags('Seat') // Group under 'Seat' in Swagger UI
 @ApiBearerAuth() // JWT Bearer token required
 @Controller('seat')
 @UseGuards(JwtAuthGuard)
 export class SeatController {
-  constructor(private readonly reservationQueueService: ReservationQueueService) {}
+  constructor(
+    private readonly reservationQueueService: ReservationQueueService,
+    private readonly seatService: SeatService
+  ) {}
 
   @Post('reserve')
   @HttpCode(HttpStatus.ACCEPTED)
@@ -105,5 +113,34 @@ export class SeatController {
       default:
         throw new NotFoundException('Reservation job not found');
     }
+  }
+
+  @Post('reset')
+  @Roles(UserRole.ADMIN)
+  @HttpCode(HttpStatus.OK)
+  @UseGuards(RolesGuard)
+  @ApiOperation({ summary: 'Reset seat reservations (Admin only)' })
+  @ApiQuery({
+    name: 'flightId',
+    required: false,
+    description: 'Optional flight ID to reset seats for a specific flight'
+  })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Seats have been successfully reset'
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Forbidden: Only admin can reset seats'
+  })
+  async resetSeats(@Body() resetSeatsDto: ResetSeatsDto) {
+    const { flightId } = resetSeatsDto;
+    await this.seatService.resetSeats(flightId);
+    return {
+      statusCode: HttpStatus.OK,
+      message: flightId
+        ? `All seats for flight ${flightId} have been successfully reset`
+        : 'All seats have been successfully reset'
+    };
   }
 }
