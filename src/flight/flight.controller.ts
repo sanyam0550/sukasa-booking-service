@@ -1,4 +1,3 @@
-// src/flight/flight.controller.ts
 import { Controller, Post, Body, UseGuards } from '@nestjs/common';
 import { FlightService } from './flight.service';
 import { ApiTags, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';

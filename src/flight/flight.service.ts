@@ -13,9 +13,9 @@ export class FlightService {
   ) {}
 
   async addFlight(flightDetails: CreateFlightDto): Promise<Flight> {
-    const { totalSeats, ...flightData } = flightDetails; // Extract totalSeats
-    const flight = new this.flightModel(flightData);
-    const savedFlight = await flight.save();
+    const { totalSeats = 300 } = flightDetails; // Extract totalSeats by default to 300
+
+    const savedFlight = await this.flightModel.create(flightDetails);
 
     const seats = this.generateSeats(savedFlight._id.toString(), totalSeats);
 

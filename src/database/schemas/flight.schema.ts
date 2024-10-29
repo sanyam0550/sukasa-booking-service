@@ -19,7 +19,7 @@ export class Flight extends Document {
   arrivalTime: Date;
 
   @Prop({ required: true, default: 300 })
-  maxSeats: number;
+  totalSeats: number;
 }
 
 export const FlightSchema = SchemaFactory.createForClass(Flight);

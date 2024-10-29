@@ -95,7 +95,7 @@ export class SeatController {
   async getReservationStatus(@Param('jobId') jobId: string) {
     const statusResult = await this.reservationQueueService.getReservationStatus(jobId);
 
-    switch (statusResult.status) {
+    switch (statusResult?.status) {
       case 'completed':
         return {
           statusCode: HttpStatus.OK,

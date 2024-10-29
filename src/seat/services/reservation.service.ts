@@ -6,15 +6,10 @@ import { ReserveSeatCommand } from '../commands/reserve.command';
 
 @Injectable()
 export class ReservationService {
-  constructor(
-    @InjectModel(Seat.name) private readonly seatModel: Model<Seat>,
-    @InjectConnection() private readonly connection: Connection
-  ) {}
+  constructor(@InjectModel(Seat.name) private readonly seatModel: Model<Seat>) {}
 
   async reserveSeat(command: ReserveSeatCommand) {
     const { seatNumber, flightId, passengerPhone, passengerName, passengerAge, userId } = command;
-
-    // Start MongoDB transaction
 
     const seat = await this.seatModel.findOne({
       seatNumber,

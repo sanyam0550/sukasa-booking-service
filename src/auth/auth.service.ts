@@ -5,7 +5,6 @@ import { Model } from 'mongoose';
 import * as bcrypt from 'bcrypt';
 import { User } from '../database/schemas/user.schema';
 import { UserRole } from './enums/user-role.enum';
-import { LogoutDto } from './dto/logout.dto';
 import { RedisService } from '../database/services/redis.service';
 
 @Injectable()
@@ -24,7 +23,7 @@ export class AuthService {
     throw new UnauthorizedException('Invalid credentials');
   }
 
-  async login(user: User) {
+  async login(user: User): Promise<{ token: string }> {
     const payload = { email: user.email, role: user.role };
     return {
       token: this.jwtService.sign(payload)
@@ -40,14 +39,15 @@ export class AuthService {
 
     // Hash the password and create a new user
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = new this.userModel({
+    // Directly call `create` without `new`
+    const newUser = await this.userModel.create({
       email,
       password: hashedPassword,
       role: UserRole.USER
     });
 
-    const savedUser = await newUser.save();
-    const userObj = savedUser.toObject();
+    // Use toObject to remove password before returning
+    const userObj = newUser.toObject();
     delete userObj.password;
     return userObj;
   }
