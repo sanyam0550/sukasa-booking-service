@@ -1,0 +1,47 @@
+services:
+  app:
+    container_name: sukasa_backend_service
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    env_file:
+      - .env
+    depends_on:
+      - mongo
+      - redis
+    networks:
+      - booking_network
+
+  mongo:
+    container_name: mongo
+    image: mongo:latest
+    restart: always
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_DATABASE: sukasa_air
+    volumes:
+      - mongo_data:/data/db  # Maps MongoDB data to a named volume
+    networks:
+      - booking_network
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data  # Maps Redis data to a named volume
+    networks:
+      - booking_network
+
+volumes:
+  mongo_data:
+  redis_data:
+
+networks:
+  booking_network:
+    driver: bridge
