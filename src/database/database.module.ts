@@ -14,7 +14,7 @@ import { RedisService } from './services/redis.service';
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
-        uri: configService.get<string>('MONGODB_URI', 'mongodb://localhost:27017/sukasa_air')
+        uri: configService.get<string>('MONGODB_URI', 'mongodb://mongo:27018/sukasa_air')
       })
     }),
     MongooseModule.forFeature([

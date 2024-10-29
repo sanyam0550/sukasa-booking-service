@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { ConflictException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { CreateFlightDto } from './dto/create-flight.dto';
@@ -13,12 +13,19 @@ export class FlightService {
   ) {}
 
   async addFlight(flightDetails: CreateFlightDto): Promise<Flight> {
-    const { totalSeats = 300 } = flightDetails; // Extract totalSeats by default to 300
+    const { flightNumber, totalSeats = 300 } = flightDetails;
 
+    // Check if a flight with the same flightNumber already exists
+    const existingFlight = await this.flightModel.findOne({ flightNumber }).exec();
+    if (existingFlight) {
+      throw new ConflictException(`Flight with number ${flightNumber} already exists.`);
+    }
+
+    // Create the new flight if it doesn't exist
     const savedFlight = await this.flightModel.create(flightDetails);
 
+    // Generate seats for the flight based on the totalSeats
     const seats = this.generateSeats(savedFlight._id.toString(), totalSeats);
-
     await this.seatModel.insertMany(seats);
 
     return savedFlight;

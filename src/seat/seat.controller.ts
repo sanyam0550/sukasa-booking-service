@@ -60,12 +60,12 @@ export class SeatController {
 
     const jobId = await this.reservationQueueService.enqueueReservation(command);
 
-    return { message: 'Reservation request queued', jobId };
+    return { success: true, message: 'Reservation request queued', jobId };
   }
 
   @Get('reservation-status/:jobId')
   @ApiOperation({ summary: 'Get the reservation status of a seat' })
-  @ApiParam({ name: 'jobId', description: 'The ID of the reservation job', example: '12345' })
+  @ApiParam({ name: 'jobId', description: 'The ID of the reservation job', example: '1' })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Reservation successful',

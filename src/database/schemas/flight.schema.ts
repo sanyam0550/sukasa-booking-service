@@ -22,4 +22,5 @@ export class Flight extends Document {
   totalSeats: number;
 }
 
-export const FlightSchema = SchemaFactory.createForClass(Flight);
+const FlightSchema = SchemaFactory.createForClass(Flight);
+export { FlightSchema };
