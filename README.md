@@ -1,99 +1,114 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Sukasa Air Booking Service
+This repository contains the booking service for Sukasa Air, built with the NestJS framework. The service supports flight management, seat reservation, and user authentication, including JWT-based security.
+## Prerequisites
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+- **Docker** (latest version)
+- **Node.js** (v22 or later)
+- **npm** (latest version)
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## Installation
 
-## Description
+1. Clone the repository:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+    ```bash
+    git clone https://github.com/sanyam0550/sukasa-booking-service.git
+    cd sukasa-booking-service
+    ```
 
-## Project setup
+2. Install the project dependencies:
 
-```bash
-$ pnpm install
-```
+    ```bash
+    npm install
+    ```
 
-## Compile and run the project
+3. Build the project:
 
-```bash
-# development
-$ pnpm run start
+    ```bash
+    npm run build
+    ```
 
-# watch mode
-$ pnpm run start:dev
+## Running the Application
 
-# production mode
-$ pnpm run start:prod
-```
+### Using Docker Compose and `start.sh` Script
 
-## Run tests
+To build and run the application along with MongoDB and Redis using Docker Compose, you can use the `start.sh` script:
 
-```bash
-# unit tests
-$ pnpm run test
+1. Make the `start.sh` script executable:
 
-# e2e tests
-$ pnpm run test:e2e
+    ```bash
+    chmod +x start.sh
+    ```
 
-# test coverage
-$ pnpm run test:cov
-```
+2. Run the script:
 
-## Deployment
+    ```bash
+    ./start.sh
+    ```
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+This script will:
+- Build the Docker image with the tag `sukasa_service:latest`.
+- Start the services (application, MongoDB, Redis) using `docker-compose up`.
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+### Directly with Docker
 
-```bash
-$ pnpm install -g mau
-$ mau deploy
-```
+Alternatively, you can build and run the application directly with Docker:
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+1. **Build the Docker image**:
 
-## Resources
+    ```bash
+    docker build -t sukasa_service:latest .
+    ```
 
-Check out a few resources that may come in handy when working with NestJS:
+2. **Run the Docker container**:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+    ```bash
+    docker run -p 3000:3000 --name sukasa-booking-service sukasa_service:latest
+    ```
 
-## Support
+## Database Seeding
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+To populate the database with initial data, including admin users and sample flights:
 
-## Stay in touch
+1. Run the seed script:
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+    ```bash
+    npm run seedDB
+    ```
 
-## License
+This will:
+- Connect to MongoDB.
+- Add default admin users.
+- Populate sample flights and seats.
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+Ensure that your MongoDB connection URI in `.env` matches the running MongoDB instance (Docker or local).
+
+## Unit Test Cases
+
+1. Install dependencies:
+
+    ```bash
+    npm install
+    ```
+
+2. Run unit tests:
+
+    ```bash
+    npm run test
+    ```
+
+## Swagger API Documentation
+
+The project includes Swagger for API documentation, which allows you to explore and test available endpoints easily.
+
+- **Access the Swagger UI**: [http://localhost:3000/api/docs](http://localhost:3000/api/docs)
+
+## Environment Variables
+
+Create a `.env` file in the root directory with the following structure:
+
+```dotenv
+MONGODB_URI=mongodb://mongo:27017/sukasa_air
+REDIS_HOST=redis
+REDIS_PORT=6379
+JWT_SECRET=myjwtsecretkey
+REDIS_URI=redis://redis:6379
