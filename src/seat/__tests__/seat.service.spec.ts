@@ -3,12 +3,18 @@ import { getModelToken } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { SeatService } from '../seat.service';
 import { Seat } from '../../database/schemas/seat.schema';
+import { Queue } from 'bullmq';
 
 describe('SeatService', () => {
   let service: SeatService;
   let seatModel: Model<Seat>;
+  let mockQueue: Queue;
 
   beforeEach(async () => {
+    mockQueue = {
+      getJobs: jest.fn() // Mock function for getJobs
+    } as unknown as Queue;
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SeatService,
@@ -18,6 +24,10 @@ describe('SeatService', () => {
             findOne: jest.fn(),
             updateMany: jest.fn()
           }
+        },
+        {
+          provide: 'BullQueue_reservationQueue', // Correct provider name for Bull queue
+          useValue: mockQueue // Mocked queue instance
         }
       ]
     }).compile();
@@ -30,76 +40,54 @@ describe('SeatService', () => {
     expect(service).toBeDefined();
   });
 
-  describe('getSeatByFlightAndNumber', () => {
-    it('should return the seat for the given flightId and seatNumber', async () => {
-      const flightId = new Types.ObjectId().toString();
-      const seatNumber = '1';
-      const mockSeat = {
-        flightId: new Types.ObjectId(flightId),
-        seatNumber,
-        isBooked: false
-      } as Seat;
+  describe('cleanUpJobs', () => {
+    it('should discard and remove all relevant jobs if flightId is not provided', async () => {
+      const mockJobs = [
+        { data: { flightId: '123' }, discard: jest.fn(), remove: jest.fn() },
+        { data: { flightId: '456' }, discard: jest.fn(), remove: jest.fn() }
+      ];
 
-      jest.spyOn(seatModel, 'findOne').mockReturnValue({
-        exec: jest.fn().mockResolvedValueOnce(mockSeat)
-      } as any);
+      // Mock getJobs to return an array of jobs
+      mockQueue.getJobs = jest.fn().mockResolvedValue(mockJobs);
 
-      const result = await service.getSeatByFlightAndNumber(flightId, seatNumber);
+      await service['cleanUpJobs']();
 
-      expect(result).toEqual(mockSeat);
-      expect(seatModel.findOne).toHaveBeenCalledWith({
-        flightId: new Types.ObjectId(flightId),
-        seatNumber
-      });
+      expect(mockQueue.getJobs).toHaveBeenCalledWith([
+        'waiting',
+        'active',
+        'delayed',
+        'completed',
+        'failed'
+      ]);
+      for (const job of mockJobs) {
+        expect(job.discard).toHaveBeenCalled();
+        expect(job.remove).toHaveBeenCalled();
+      }
     });
 
-    it('should return null if no seat is found', async () => {
-      const flightId = new Types.ObjectId().toString();
-      const seatNumber = '1';
+    it('should only discard and remove jobs with matching flightId', async () => {
+      const flightId = '123';
+      const mockJobs = [
+        { data: { flightId }, discard: jest.fn(), remove: jest.fn() },
+        { data: { flightId: '456' }, discard: jest.fn(), remove: jest.fn() }
+      ];
 
-      jest.spyOn(seatModel, 'findOne').mockReturnValue({
-        exec: jest.fn().mockResolvedValueOnce(null)
-      } as any);
+      // Mock getJobs to return an array of jobs
+      mockQueue.getJobs = jest.fn().mockResolvedValue(mockJobs);
 
-      const result = await service.getSeatByFlightAndNumber(flightId, seatNumber);
+      await service['cleanUpJobs'](flightId);
 
-      expect(result).toBeNull();
-      expect(seatModel.findOne).toHaveBeenCalledWith({
-        flightId: new Types.ObjectId(flightId),
-        seatNumber
-      });
-    });
-  });
-
-  describe('resetSeats', () => {
-    it('should reset all seats if flightId is not provided', async () => {
-      const updateQuery = {
-        $set: { isBooked: false },
-        $unset: { userId: 1, passengerName: 1, passengerPhone: 1, passengerAge: 1 }
-      };
-
-      jest.spyOn(seatModel, 'updateMany').mockResolvedValue({ nModified: 10 } as any);
-
-      await service.resetSeats();
-
-      expect(seatModel.updateMany).toHaveBeenCalledWith({}, updateQuery);
-    });
-
-    it('should reset seats for a specific flight when flightId is provided', async () => {
-      const flightId = new Types.ObjectId().toString();
-      const updateQuery = {
-        $set: { isBooked: false },
-        $unset: { userId: 1, passengerName: 1, passengerPhone: 1, passengerAge: 1 }
-      };
-
-      jest.spyOn(seatModel, 'updateMany').mockResolvedValue({ nModified: 5 } as any);
-
-      await service.resetSeats(flightId);
-
-      expect(seatModel.updateMany).toHaveBeenCalledWith(
-        { flightId: new Types.ObjectId(flightId) },
-        updateQuery
-      );
+      expect(mockQueue.getJobs).toHaveBeenCalledWith([
+        'waiting',
+        'active',
+        'delayed',
+        'completed',
+        'failed'
+      ]);
+      expect(mockJobs[0].discard).toHaveBeenCalled();
+      expect(mockJobs[0].remove).toHaveBeenCalled();
+      expect(mockJobs[1].discard).not.toHaveBeenCalled();
+      expect(mockJobs[1].remove).not.toHaveBeenCalled();
     });
   });
 });

@@ -25,7 +25,7 @@ export class FlightService {
     const savedFlight = await this.flightModel.create(flightDetails);
 
     // Generate seats for the flight based on the totalSeats
-    const seats = this.generateSeats(savedFlight._id.toString(), totalSeats);
+    const seats = this.generateSeats(savedFlight.flightNumber, totalSeats);
     await this.seatModel.insertMany(seats);
 
     return savedFlight;
@@ -39,7 +39,7 @@ export class FlightService {
       seats.push({
         seatNumber: i.toString(),
         seatType: i <= Math.floor(totalSeats * 0.75) ? 'economy' : 'business', // Example 75% economy, 25% business
-        flightId: new Types.ObjectId(flightId),
+        flightId,
         isBooked: false
       });
     }
@@ -48,6 +48,6 @@ export class FlightService {
   }
 
   async checkFlightExists(flightId: string): Promise<boolean> {
-    return !!(await this.flightModel.findById(flightId).exec());
+    return !!(await this.flightModel.findOne({ flightNumber: flightId }).exec());
   }
 }

@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 @Schema({ timestamps: true })
 export class Flight extends Document {
   @Prop({ required: true, unique: true })
-  flightNumber: string;
+  flightNumber: string; //keeping this unique for simplicity of the app
 
   @Prop({ required: true })
   departure: string;

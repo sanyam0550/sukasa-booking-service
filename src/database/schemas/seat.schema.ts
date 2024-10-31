@@ -1,6 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document, Types } from 'mongoose';
-import { Flight } from './flight.schema';
+import { Document } from 'mongoose';
 
 enum SeatType {
   ECONOMY = 'economy',
@@ -18,8 +17,8 @@ export class Seat extends Document {
   @Prop({ default: false })
   isBooked: boolean;
 
-  @Prop({ type: Types.ObjectId, ref: 'Flight', required: true })
-  flightId: Types.ObjectId | Flight;
+  @Prop({ type: String, required: true })
+  flightId: string;
 
   @Prop({ type: String })
   userId: string; // Represents the user who made the booking
@@ -37,4 +36,5 @@ export class Seat extends Document {
 
 const SeatSchema = SchemaFactory.createForClass(Seat);
 // Exporting the SeatType enum for use in other files
+SeatSchema.index({ seatNumber: 1, flightId: 1 }, { unique: true });
 export { SeatSchema };

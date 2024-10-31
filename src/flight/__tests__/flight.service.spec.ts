@@ -20,7 +20,8 @@ describe('FlightService', () => {
           useValue: {
             create: jest.fn(),
             save: jest.fn(),
-            findById: jest.fn()
+            findById: jest.fn(),
+            findOne: jest.fn()
           }
         },
         {
@@ -59,12 +60,15 @@ describe('FlightService', () => {
       };
 
       const generatedSeats = service['generateSeats'](
-        mockFlight._id.toString(),
+        mockFlight.flightNumber,
         createFlightDto.totalSeats
       );
 
       jest.spyOn(flightModel, 'create').mockReturnValue(mockFlight as any);
       jest.spyOn(seatModel, 'insertMany').mockResolvedValue(generatedSeats as any);
+      jest
+        .spyOn(flightModel, 'findOne')
+        .mockReturnValue({ exec: jest.fn().mockResolvedValueOnce(null) } as any);
 
       const result = await service.addFlight(createFlightDto);
 
@@ -79,7 +83,7 @@ describe('FlightService', () => {
 
   describe('generateSeats', () => {
     it('should generate seats based on total seats', () => {
-      const flightId = new Types.ObjectId().toString();
+      const flightId = 'FL123';
       const totalSeats = 10;
       const seats = service['generateSeats'](flightId, totalSeats);
 
@@ -87,7 +91,7 @@ describe('FlightService', () => {
       expect(seats[0]).toMatchObject({
         seatNumber: '1',
         seatType: 'economy',
-        flightId: new Types.ObjectId(flightId),
+        flightId,
         isBooked: false
       });
       expect(seats[totalSeats - 1].seatType).toBe('business'); // Assuming 25% are business seats
@@ -96,24 +100,25 @@ describe('FlightService', () => {
 
   describe('checkFlightExists', () => {
     it('should return true if the flight exists', async () => {
-      const flightId = new Types.ObjectId().toString();
-      jest.spyOn(flightModel, 'findById').mockReturnValue({
+      const flightId = 'FL123';
+      jest.spyOn(flightModel, 'findOne').mockReturnValue({
         exec: jest.fn().mockResolvedValueOnce({ _id: flightId })
       } as any);
 
       const result = await service.checkFlightExists(flightId);
       expect(result).toBe(true);
-      expect(flightModel.findById).toHaveBeenCalledWith(flightId);
+      expect(flightModel.findOne).toHaveBeenCalledWith({ flightNumber: flightId });
     });
 
     it('should return false if the flight does not exist', async () => {
-      const flightId = new Types.ObjectId().toString();
-      jest.spyOn(flightModel, 'findById').mockReturnValue({
-        exec: jest.fn().mockResolvedValueOnce(null)
-      } as any);
+      const flightId = 'FL123';
+      jest
+        .spyOn(flightModel, 'findOne')
+        .mockReturnValue({ exec: jest.fn().mockResolvedValueOnce(null) } as any);
+
       const result = await service.checkFlightExists(flightId);
       expect(result).toBe(false);
-      expect(flightModel.findById).toHaveBeenCalledWith(flightId);
+      expect(flightModel.findOne).toHaveBeenCalledWith({ flightNumber: flightId });
     });
   });
 });

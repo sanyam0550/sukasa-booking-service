@@ -8,7 +8,8 @@ import {
   Param,
   NotFoundException,
   HttpStatus,
-  HttpCode
+  HttpCode,
+  Query
 } from '@nestjs/common';
 import {
   ApiTags,
@@ -27,7 +28,6 @@ import { UserRole } from '../auth/enums/user-role.enum';
 import { Roles } from '../auth/roles.decorator';
 import { SeatService } from './seat.service';
 import { RolesGuard } from '../auth/roles.guard';
-import { ResetSeatsDto } from './dto/reset-seat.dto';
 
 @ApiTags('Seat') // Group under 'Seat' in Swagger UI
 @ApiBearerAuth() // JWT Bearer token required
@@ -116,7 +116,7 @@ export class SeatController {
   }
 
   @Post('reset')
-  @Roles(UserRole.ADMIN)
+  @Roles(UserRole.ADMIN) //ONly
   @HttpCode(HttpStatus.OK)
   @UseGuards(RolesGuard)
   @ApiOperation({ summary: 'Reset seat reservations (Admin only)' })
@@ -133,8 +133,7 @@ export class SeatController {
     status: HttpStatus.FORBIDDEN,
     description: 'Forbidden: Only admin can reset seats'
   })
-  async resetSeats(@Body() resetSeatsDto: ResetSeatsDto) {
-    const { flightId } = resetSeatsDto;
+  async resetSeats(@Query('flightId') flightId?: string) {
     await this.seatService.resetSeats(flightId);
     return {
       statusCode: HttpStatus.OK,

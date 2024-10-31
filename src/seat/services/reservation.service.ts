@@ -13,7 +13,7 @@ export class ReservationService {
 
     const seat = await this.seatModel.findOne({
       seatNumber,
-      flightId: new Types.ObjectId(flightId),
+      flightId,
       isBooked: false
     });
 

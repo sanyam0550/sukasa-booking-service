@@ -35,7 +35,7 @@ describe('ReservationService', () => {
   describe('reserveSeat', () => {
     const reserveSeatCommand: ReserveSeatCommand = {
       seatNumber: '1',
-      flightId: new Types.ObjectId().toString(),
+      flightId: 'FL123',
       passengerPhone: '1234567890',
       passengerName: 'John Doe',
       passengerAge: 30,
@@ -45,7 +45,7 @@ describe('ReservationService', () => {
     it('should successfully reserve a seat', async () => {
       const mockSeat = {
         seatNumber: '1',
-        flightId: new Types.ObjectId(reserveSeatCommand.flightId),
+        flightId: reserveSeatCommand.flightId,
         isBooked: false,
         save: jest.fn().mockResolvedValueOnce(true) // Explicitly mock the save function
       };
@@ -59,7 +59,7 @@ describe('ReservationService', () => {
 
       expect(seatModel.findOne).toHaveBeenCalledWith({
         seatNumber: reserveSeatCommand.seatNumber,
-        flightId: new Types.ObjectId(reserveSeatCommand.flightId),
+        flightId: reserveSeatCommand.flightId,
         isBooked: false
       });
 
@@ -75,7 +75,7 @@ describe('ReservationService', () => {
       await expect(service.reserveSeat(reserveSeatCommand)).rejects.toThrow(ConflictException);
       expect(seatModel.findOne).toHaveBeenCalledWith({
         seatNumber: reserveSeatCommand.seatNumber,
-        flightId: new Types.ObjectId(reserveSeatCommand.flightId),
+        flightId: reserveSeatCommand.flightId,
         isBooked: false
       });
     });

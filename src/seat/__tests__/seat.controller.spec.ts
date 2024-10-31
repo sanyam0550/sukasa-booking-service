@@ -6,7 +6,6 @@ import { SeatService } from '../seat.service';
 import { RolesGuard } from '../../auth/roles.guard';
 import { JwtAuthGuard } from '../../auth/jwt.guard';
 import { ReserveSeatDto } from '../dto/reserve-seat.dto';
-import { ResetSeatsDto } from '../dto/reset-seat.dto';
 
 describe('SeatController', () => {
   let controller: SeatController;
@@ -62,7 +61,7 @@ describe('SeatController', () => {
       const result = await controller.reserveSeat(reserveSeatDto, {
         user: { email: 'user@example.com' }
       });
-      expect(result).toEqual({ message: 'Reservation request queued', jobId });
+      expect(result).toEqual({ success: true, message: 'Reservation request queued', jobId });
       expect(reservationQueueService.enqueueReservation).toHaveBeenCalledWith(expect.any(Object));
     });
   });
@@ -123,7 +122,7 @@ describe('SeatController', () => {
     it('should reset all seats and return success message', async () => {
       jest.spyOn(seatService, 'resetSeats').mockResolvedValue();
 
-      const result = await controller.resetSeats({ flightId: undefined } as ResetSeatsDto);
+      const result = await controller.resetSeats();
       expect(result).toEqual({
         statusCode: HttpStatus.OK,
         message: 'All seats have been successfully reset'
@@ -134,7 +133,7 @@ describe('SeatController', () => {
     it('should reset seats for a specific flight and return success message', async () => {
       jest.spyOn(seatService, 'resetSeats').mockResolvedValue();
 
-      const result = await controller.resetSeats({ flightId: 'flight123' });
+      const result = await controller.resetSeats('flight123');
       expect(result).toEqual({
         statusCode: HttpStatus.OK,
         message: 'All seats for flight flight123 have been successfully reset'
